@@ -3,7 +3,7 @@ import mysql.connector
 from mysql.connector import errorcode
 
 from flask import Flask, request
-from flask_limiter import Limiter 
+from flask_limiter import Limiter, util
 from hashlib import sha256
 import random
 import string
@@ -124,21 +124,24 @@ def get_all_user(cnx, cursor):
     users = cursor.fetchall()
     return json.dumps({'users': users})
 
-# limiter = Limiter(app, key_func=request.remote_addr, default_limits=["5 per second"])
+limiter = Limiter(util.get_remote_address, app=app, default_limits= ["5 per second"])
 
+@limiter.limit('5 per second')
 @app.route('/')
 def hello():
     return 'hehe'
 
+@limiter.limit('5 per second')
 @app.route('/all', methods=['GET'])
 def get_all():
     return get_all_user(cnx, cursor)
 
-# @limiter.limit('5 per second')
+@limiter.limit('5 per second')
 @app.route("/login", methods=["POST"])
 def log():
     return login(cnx, cursor, request.get_json()["username"], request.get_json()["password"])
 
+@limiter.limit('5 per minutes', override_defaults=True)
 @app.route('/gess_pass', methods=['POST'])
 def gess():
     return gess_pass(cnx, cursor, request.get_json()["username"])
@@ -165,7 +168,7 @@ if __name__ == '__main__':
     create_database(cnx, cursor, DB_NAME)
     create_table(cnx, cursor, TABLES)
     # init_user(cnx, cursor, add_user, num)
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=2410)
     
 # cursor.close()
 # cnx.close()
