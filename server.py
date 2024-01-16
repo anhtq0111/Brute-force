@@ -109,15 +109,15 @@ def login(cnx, cursor, username, password):
 
     return json.dumps({"result": "success", "user_id": userId})
 
-def gess_pass(cnx, cursor, username):
+def gess_pass(cnx, cursor, username, hashed_arr):
     cursor.execute(f"SELECT * FROM users WHERE username = '{username}'")
     data = cursor.fetchone()
     if data == None:
         return json.dumps({"result": "failed"})
     else:
         userId, username, passwor, passw, loggedIn, loggedAt = data
-        # password_hash = sha256(password.encode()).hexdigest()
-    return passw
+        password = hashed_arr.index(passwor)
+    return str(password)
 
 def get_all_user(cnx, cursor):
     cursor.execute("SELECT * FROM users")
@@ -144,7 +144,7 @@ def log():
 @limiter.limit('5 per minutes', override_defaults=True)
 @app.route('/gess_pass', methods=['POST'])
 def gess():
-    return gess_pass(cnx, cursor, request.get_json()["username"])
+    return gess_pass(cnx, cursor, request.get_json()["username"], hashed_arr)
 
 if __name__ == '__main__':
     DB_NAME = 'hehe'
@@ -155,7 +155,7 @@ if __name__ == '__main__':
         "  `userId` int(11) NOT NULL AUTO_INCREMENT,"
         "  `username` VARCHAR(256) UNIQUE NOT NULL,"
         "  `password` VARCHAR(256) NOT NULL,"
-        "  `passw` VARCHAR(256) NOT NULL,"
+        # "  `passw` VARCHAR(256) NOT NULL,"
         "  `loggedIn` TINYINT DEFAULT 0,"
         "  `loggedAt` DATETIME DEFAULT NULL,"
         "  PRIMARY KEY (`userId`)"
@@ -164,6 +164,13 @@ if __name__ == '__main__':
     add_user = ("INSERT INTO users "
                 "(username, password, passw) "
                 "VALUES ( %s, %s, %s)")
+    
+    hashed_arr = []
+    for i in range(1000000):
+        str_i = str(i).rjust(6, '0')
+        hashed_arr.append(sha256(str_i.encode('utf-8')).hexdigest())
+
+
     cnx, cursor = connect_db()
     create_database(cnx, cursor, DB_NAME)
     create_table(cnx, cursor, TABLES)
@@ -172,3 +179,4 @@ if __name__ == '__main__':
     
 # cursor.close()
 # cnx.close()
+    
