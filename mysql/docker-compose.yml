@@ -1,0 +1,44 @@
+version: '2'
+
+services:
+  flaskapp:
+    build: ./backend
+    container_name: flaskapp
+    ports:
+      - "2410:5000"
+    volumes:
+      - ./backend:/usr/src/app
+    environment:
+      - NAME=flaskapp
+      - PORT=5000
+    networks:
+      - Flask-mysql
+
+  streamlit:
+    build: ./frontend
+    ports:
+      - "2202:8501"
+    volumes:
+      - ./frontend:/usr/src/app
+    environment:
+      - NAME=Streamlit
+    networks:
+      - Flask-mysql
+    
+  mysql:
+    image: mysql:8.2.0
+    container_name: mysqlcontainer
+    restart: always
+    ports:
+      - 0017:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=my-secret-pw  
+    volumes:
+      - ./frontend/volume:/var/lib/mysql
+      - ./frontend/volum-config:/etc/mysql/conf.d/**
+    networks:
+      - Flask-mysql
+
+networks:
+  Flask-mysql:
+    driver: bridge
