@@ -5,7 +5,7 @@ import streamlit as st
 
 st.title('Brute-force')
 if st.button('Init database'):
-    url = "http://172.23.0.1:2410/init"
+    url = "http://172.20.0.1:2410/init"
     headers = {"Content-Type": "application/json"}
     start = time.time()
     response = requests.get(url, headers=headers)
@@ -18,7 +18,7 @@ if st.button('Init database'):
     else:
         st.error('Can not request')
 
-option = st.selectbox("Choose option:", ('Login', 'Guess pass'))
+option = st.selectbox("Choose option:", ('Guess pass', 'Login',))
 
 if option == 'Login':
     username = st.text_input('Enter user name')
@@ -26,7 +26,7 @@ if option == 'Login':
     if st.button('Login'):
         data = {"username": username,
             "password": password}
-        url = "http://172.23.0.1:2410/login"
+        url = "http://172.20.0.1:2410/login"
         headers = {"Content-Type": "application/json"}
         response = requests.post(url, headers=headers, data=json.dumps(data))
 
@@ -43,7 +43,7 @@ elif option == 'Guess pass':
 
     if st.button('Guess'):
         data = {"username": username,}
-        url = "http://172.23.0.1:2410/gess_pass"
+        url = "http://172.20.0.1:2410/gess_pass"
         headers = {"Content-Type": "application/json"}
         start = time.time()
         response = requests.post(url, headers=headers, data=json.dumps(data))

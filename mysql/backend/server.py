@@ -200,7 +200,7 @@ if __name__ == '__main__':
         str_i = str(i).rjust(6, '0')
         hashed_arr.append(sha256(str_i.encode('utf-8')).hexdigest())
 
-    app.run(host='0.0.0.0',port=5000, debug=True)
+    app.run(host='0.0.0.0', debug=True)
     
 
     
